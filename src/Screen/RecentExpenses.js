@@ -25,8 +25,6 @@ function RecentExpenses({ navigation }) {
     return expense.date >= date7DaysAgo && expense.date <= today;
   });
 
-  console.log(JSON.stringify(recentExpenses));
-
   function renderItem(itemData) {
     const item = itemData.item;
 
@@ -39,6 +37,7 @@ function RecentExpenses({ navigation }) {
   }
 
   var sum = 0;
+
   function TotalValues(expense) {
     sum = sum + Number(expense);
     setTotalPrice(sum);

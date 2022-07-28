@@ -6,7 +6,9 @@ function Card({ id, price, name, date, onPress }) {
   //Date gives error for that you have to make formated function or just date.toString()
 
   function getformatedDate(ndate) {
-    return `${ndate.getFullYear()}-${ndate.getMonth() + 1}-${ndate.getDate()}`;
+    return `${ndate.getFullYear()}-${
+      ndate.getMonth() < 9 ? "0" + [ndate.getMonth() + 1] : ndate.getMonth() + 1
+    }-${ndate.getDate() < 9 ? "0" + ndate.getDate() : ndate.getDate()}`;
   }
 
   return (

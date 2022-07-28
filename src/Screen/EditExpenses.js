@@ -17,13 +17,20 @@ function EditExpenses({ route, navigation }) {
   const [InputData, setInputData] = useState({
     Price: data ? data.price : "",
     Name: data ? data.name : "",
+    Date: data ? data.date.toString().slice(0, 15) : "",
   });
 
-  const [nDate, setnDate] = useState("");
+  const [nDate, setnDate] = useState(data ? getformatedDate(data.date) : "");
+
+  function getformatedDate(ndate) {
+    return `${ndate.getFullYear()}-${
+      ndate.getMonth() < 9 ? "0" + [ndate.getMonth() + 1] : ndate.getMonth() + 1
+    }-${ndate.getDate() < 9 ? "0" + ndate.getDate() : ndate.getDate()}`;
+  }
 
   let price = InputData.Price.toString(),
     name = InputData.Name.toString(),
-    valdate = data ? data.date.toString().slice(8, 18) : nDate;
+    valdate = nDate;
 
   function ChangeValue(value, input) {
     setInputData((curInput) => {
@@ -32,16 +39,17 @@ function EditExpenses({ route, navigation }) {
   }
 
   function Update() {
-    console.log("Update");
     validate();
+    // console.log("DATA =" + JSON.stringify(InputData));
+    // console.log("Date:", new Date(nDate));
 
     if (validateI) {
-      Container.addExpense({
+      Container.updateExpense(data.id, {
         name: InputData.Name,
         price: InputData.Price,
         date: new Date(nDate),
       });
-      console.log("DATA =" + JSON.stringify(InputData, nDate));
+
       navigation.goBack();
     }
   }
@@ -51,8 +59,6 @@ function EditExpenses({ route, navigation }) {
     validate();
 
     if (validateI) {
-      console.log("DATA =" + JSON.stringify(InputData) + { Date: nDate });
-
       Container.addExpense({
         name: InputData.Name,
         price: InputData.Price,
@@ -68,16 +74,34 @@ function EditExpenses({ route, navigation }) {
   }
 
   //Validation
+  var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]+/;
 
   function validate() {
+    console.log("value=" + nDate.charAt(7));
+
+    console.log(format.test(InputData.Price));
+
     if (!InputData.Price) {
-      return Alert.alert("Emprty Price");
+      return Alert.alert("Empty Price");
     }
+    if (!format.test(InputData.Price)) {
+      return Alert.alert("Empty Price");
+    }
+
     if (!InputData.Name) {
-      return Alert.alert("Emprty Tittle");
+      return Alert.alert("Empty Tittle");
     }
-    if (!nDate && nDate.length == 10) {
-      return Alert.alert("Empty Date");
+    if (!nDate || nDate.length < 10) {
+      return Alert.alert(
+        "Wrong Or Empty Date",
+        "Kindly Follow the Defined Formate as: \n\n YYYY-MM-DD"
+      );
+    }
+    if (nDate.charAt(4) != "-" || nDate.charAt(7) != "-") {
+      return Alert.alert(
+        "Invalid formate",
+        "Kindly Follow the Defined Formate as: \n\n YYYY-MM-DD"
+      );
     }
     validateI = true;
   }
@@ -121,6 +145,16 @@ function EditExpenses({ route, navigation }) {
           value={valdate}
         />
       </View>
+      <Text
+        style={{
+          color: "white",
+          fontSize: 16,
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
+      >
+        {InputData.Date}
+      </Text>
       <View style={styles.ButtonContainer}>
         {data ? (
           <TouchableOpacity onPress={Delete}>
