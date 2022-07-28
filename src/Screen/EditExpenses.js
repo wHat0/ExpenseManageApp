@@ -24,8 +24,10 @@ function EditExpenses({ route, navigation }) {
 
   function getformatedDate(ndate) {
     return `${ndate.getFullYear()}-${
-      ndate.getMonth() < 9 ? "0" + [ndate.getMonth() + 1] : ndate.getMonth() + 1
-    }-${ndate.getDate() < 9 ? "0" + ndate.getDate() : ndate.getDate()}`;
+      ndate.getMonth() < 10
+        ? "0" + [ndate.getMonth() + 1]
+        : ndate.getMonth() + 1
+    }-${ndate.getDate() < 10 ? "0" + ndate.getDate() : ndate.getDate()}`;
   }
 
   let price = InputData.Price.toString(),
@@ -84,8 +86,8 @@ function EditExpenses({ route, navigation }) {
     if (!InputData.Price) {
       return Alert.alert("Empty Price");
     }
-    if (!format.test(InputData.Price)) {
-      return Alert.alert("Empty Price");
+    if (format.test(InputData.Price)) {
+      return Alert.alert("Wrong Price");
     }
 
     if (!InputData.Name) {

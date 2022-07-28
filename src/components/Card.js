@@ -7,8 +7,10 @@ function Card({ id, price, name, date, onPress }) {
 
   function getformatedDate(ndate) {
     return `${ndate.getFullYear()}-${
-      ndate.getMonth() < 9 ? "0" + [ndate.getMonth() + 1] : ndate.getMonth() + 1
-    }-${ndate.getDate() < 9 ? "0" + ndate.getDate() : ndate.getDate()}`;
+      ndate.getMonth() < 10
+        ? "0" + [ndate.getMonth() + 1]
+        : ndate.getMonth() + 1
+    }-${ndate.getDate() < 10 ? "0" + ndate.getDate() : ndate.getDate()}`;
   }
 
   return (

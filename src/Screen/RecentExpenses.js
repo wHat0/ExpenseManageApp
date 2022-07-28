@@ -65,7 +65,7 @@ function RecentExpenses({ navigation }) {
             }}
           >
             <Text style={{ color: "white", fontWeight: "bold" }}>
-              Total Expenses:{"    "} ${TotalPrice}
+              Total Expenses:{"    "} ${TotalPrice.toFixed(2)}
             </Text>
           </View>
         </View>
