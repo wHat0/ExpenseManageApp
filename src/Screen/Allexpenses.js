@@ -1,35 +1,54 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useContext, useEffect, useState } from "react";
-import { Text, View, StyleSheet, ImageBackground } from "react-native";
+import { Text, View, StyleSheet, ImageBackground, Alert } from "react-native";
 import { ScrollView } from "react-native";
 import { FlatList } from "react-native";
 import Card from "../components/Card";
 import { ExpensesContext } from "../store/context";
+import { showExpense } from "../../util/http";
+import LoadingOverlay from "../components/LoadingOverlay";
+import { AuthContext } from "../store/AuthContext";
+import Button from "../components/Button";
+import { useIsFocused } from "@react-navigation/native";
 
 function Allexpenses({ navigation }) {
   const Container = useContext(ExpensesContext);
+  const isFocused = useIsFocused();
 
-  // console.log(Container.expenses); //Details Fetched from context
+  const [Loading, setLoading] = useState(false);
 
+  const authContext = useContext(AuthContext);
+  const token = authContext.token;
   const Details = Container.expenses;
 
-  // const Details = [
-  //   { id: 1, price: "150", name: "Book", date: new Date("2021-05-19") },
-  //   { id: 2, price: "650", name: "Cat Food", date: new Date("2021-05-20") },
-  //   { id: 3, price: "350", name: "Book Stall", date: new Date("2021-05-29") },
-  //   { id: 4, price: "50", name: "Bat", date: new Date("2021-05-09") },
-  //   { id: 5, price: "250", name: "Book 2", date: new Date("2021-06-19") },
-  //   { id: 9, price: "550", name: "Book 6", date: new Date("2021-08-19") },
-  //   { id: 8, price: "950", name: "Book1", date: new Date("2021-05-17") },
-  //   { id: 6, price: "1150", name: "Book 008", date: new Date("2021-06-20") },
-  //   { id: 7, price: "10", name: "Book", date: new Date("2021-05-18") },
-  // ];
+  useEffect(() => {
+    async function getDataBase() {
+      setLoading(true);
+      try {
+        console.log("called Data");
+        const data = await showExpense(token);
+        Container.resetExpense();
+        Container.setExpense(data);
+      } catch {
+        return Alert.alert("NETWORK ERROR"), setLoading(false);
+      }
+      setLoading(false);
+    }
+    if (isFocused) {
+      getDataBase();
+    }
+  }, []);
 
+  // function onPress() {
+  //   console.log("RESETCALLED");
+  //   Container.resetExpense();
+  // }
+
+  // console.log(!Details);
   const [TotalPrice, setTotalPrice] = useState(0);
 
   function renderItem(itemData) {
     const item = itemData.item;
-
     // const DetailsList = {
     //   id: item.id,
     //   price: item.price,
@@ -48,10 +67,14 @@ function Allexpenses({ navigation }) {
   }
   var sum = 0;
 
-  const TotalValues = (expense) => {
+  function TotalValues(expense) {
     sum = sum + Number(expense);
     setTotalPrice(sum);
-  };
+  }
+
+  if (Loading) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <LinearGradient
@@ -63,28 +86,41 @@ function Allexpenses({ navigation }) {
         style={{ flex: 1 }}
         imageStyle={{ opacity: 0.3, resizeMode: "cover" }}
       >
-        <View style={{ alignItems: "center" }}>
-          <View
-            style={{
-              backgroundColor: "grey",
-              width: "80%",
-              height: 35,
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ color: "white", fontWeight: "bold" }}>
-              Total Expenses:{"    "} ${TotalPrice.toFixed(2)}
-            </Text>
+        {/* {Details ? (
+          <View>
+            <Text>YOU have it</Text>
           </View>
-        </View>
-
-        <FlatList
-          data={Details}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
+        ) : (
+          <View>
+            <Text>DONE YOU Don't have Details</Text>
+          </View>
+        )} */}
+        {Details ? (
+          <View style={{ marginBottom: 25 }}>
+            <View
+              style={{
+                backgroundColor: "grey",
+                width: "50%",
+                height: 35,
+                borderRadius: 8,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "bold" }}>
+                Total Expenses:{"    "} {TotalPrice.toFixed(2)}
+              </Text>
+            </View>
+            <FlatList
+              data={Details}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+            />
+          </View>
+        ) : (
+          <Text>Data Not Available</Text>
+        )}
+        {/* <Button onPress={onPress} /> */}
       </ImageBackground>
     </LinearGradient>
   );

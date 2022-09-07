@@ -1,14 +1,37 @@
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
-import StackNav from "./src/routes/StackNav";
-import ExpensesContextProvider from "./src/store/context";
+import { useContext, useEffect } from "react";
+import StackNav, { AuthStack } from "./src/routes/StackNav";
+import AuthContextProvider, { AuthContext } from "./src/store/AuthContext";
+import ExpensesContextProvider, { ExpensesContext } from "./src/store/context";
 
 export default function App() {
   return (
     <ExpensesContextProvider>
-      <NavigationContainer>
-        <StackNav />
-      </NavigationContainer>
+      <AuthContextProvider>
+        <Navigation />
+      </AuthContextProvider>
     </ExpensesContextProvider>
+  );
+}
+
+function Navigation() {
+  const ContxAuth = useContext(AuthContext);
+
+  useEffect(() => {
+    async function getToken() {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        ContxAuth.authenticate(token);
+      }
+      return;
+    }
+    getToken();
+  }, []);
+
+  return (
+    <NavigationContainer>
+      {ContxAuth.isTokenValide ? <StackNav /> : <AuthStack />}
+    </NavigationContainer>
   );
 }

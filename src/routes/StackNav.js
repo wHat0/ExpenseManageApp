@@ -6,6 +6,8 @@ import Allexpenses from "../Screen/Allexpenses";
 import TabNav from "./TabNav";
 
 import { StatusBar } from "expo-status-bar";
+import SignUpScreen from "../Screen/SignUpScreen";
+import LoginScreen from "../Screen/LoginScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,7 +17,7 @@ function StackNav(props) {
       <StatusBar style="light" />
       <Stack.Navigator>
         <Stack.Screen
-          name="Home"
+          name="HomeScreen"
           component={TabNav}
           options={{ headerShown: false }}
         />
@@ -29,6 +31,26 @@ function StackNav(props) {
             presentation: "modal",
             contentStyle: { backgroundColor: "black" },
           }}
+        />
+      </Stack.Navigator>
+    </>
+  );
+}
+
+export function AuthStack() {
+  return (
+    <>
+      <StatusBar style="light" />
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen
+          name="SignUp"
+          component={SignUpScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </>

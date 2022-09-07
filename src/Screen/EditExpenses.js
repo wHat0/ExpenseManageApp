@@ -1,14 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import { validatePathConfig } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useContext, useState } from "react";
 import { Text, View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { DeleteRequest, storeExpense, UpdateRequest } from "../../util/http";
 import Button from "../components/Button";
 import Input from "../components/Input";
+import LoadingOverlay from "../components/LoadingOverlay";
 import { ExpensesContext } from "../store/context";
 
 function EditExpenses({ route, navigation }) {
   const Container = useContext(ExpensesContext);
+  const [Loading, setLoading] = useState(false);
 
   const data = route.params;
 
@@ -40,38 +42,55 @@ function EditExpenses({ route, navigation }) {
     });
   }
 
-  function Update() {
+  async function Update() {
     validate();
-    // console.log("DATA =" + JSON.stringify(InputData));
-    // console.log("Date:", new Date(nDate));
 
     if (validateI) {
+      setLoading(true);
       Container.updateExpense(data.id, {
         name: InputData.Name,
         price: InputData.Price,
         date: new Date(nDate),
       });
-
-      navigation.goBack();
-    }
-  }
-
-  function Addfunc() {
-    console.log("Add");
-    validate();
-
-    if (validateI) {
-      Container.addExpense({
+      await UpdateRequest((id = data.id), {
         name: InputData.Name,
         price: InputData.Price,
         date: new Date(nDate),
       });
+      setLoading(false);
       navigation.goBack();
     }
   }
 
-  function Delete() {
+  async function Addfunc() {
+    console.log("Add");
+
+    validate();
+    if (validateI) {
+      setLoading(true);
+      const id = storeExpense({
+        name: InputData.Name,
+        price: InputData.Price,
+        date: new Date(nDate),
+      });
+      Container.addExpense({
+        id: id,
+        name: InputData.Name,
+        price: InputData.Price,
+        date: new Date(nDate),
+      });
+      setLoading(false);
+
+      navigation.goBack();
+    }
+  }
+
+  async function Delete() {
+    setLoading(true);
     Container.deleteExpense(data.id);
+    console.log(data.id);
+    await DeleteRequest(data.id);
+    setLoading(false);
     navigation.goBack();
   }
 
@@ -108,6 +127,9 @@ function EditExpenses({ route, navigation }) {
     validateI = true;
   }
 
+  if (Loading) {
+    return <LoadingOverlay />;
+  }
   return (
     <LinearGradient
       colors={["#4e0329", "#ddf", "#4e0329"]}
@@ -117,7 +139,13 @@ function EditExpenses({ route, navigation }) {
         alignItems: "center",
       }}
     >
-      <View style={{ flexDirection: "row", justifyContent: "center" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          width: "50%",
+        }}
+      >
         <Input
           label={"Price"}
           input={"Dollars"}
@@ -145,6 +173,7 @@ function EditExpenses({ route, navigation }) {
           type={"number-pad"}
           TextValues={(value) => setnDate(value)}
           value={valdate}
+          length={10}
         />
       </View>
       <Text
